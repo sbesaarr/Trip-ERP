@@ -2,6 +2,61 @@ import React, { useState, useEffect, useContext } from 'react';
 import api from '../api';
 import { AuthContext } from '../context/AuthContext';
 
+// SettingBox defined OUTSIDE Settings to prevent input focus loss on re-render
+const SettingBox = ({ title, type, items, val, setVal, catVal, setCatVal, catOptions, onAdd, onDelete }) => (
+    <div style={{ flex: 1, background: 'white', padding: '24px', borderRadius: '16px', border: '1px solid #e2e8f0', minWidth: '300px', boxShadow: '0 4px 6px rgba(0,0,0,0.02)' }}>
+        <h3 style={{ marginBottom: '16px', fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.01em' }}>{title}</h3>
+        
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', gap: '8px' }}>
+                <input 
+                    type="text" 
+                    placeholder="Ketik Nama Baru..." 
+                    value={val} 
+                    onChange={e => setVal(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') onAdd(type, val, setVal, catVal, setCatVal); }}
+                    style={{ flex: 1, padding: '10px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }} 
+                />
+                <button 
+                    onClick={() => onAdd(type, val, setVal, catVal, setCatVal)} 
+                    className="btn btn-primary" 
+                    style={{ padding: '0 16px', fontSize: '1.2rem' }}
+                >
+                    +
+                </button>
+            </div>
+            {catOptions && (
+                <select 
+                    value={catVal || ''} 
+                    onChange={e => setCatVal(e.target.value)} 
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
+                >
+                    <option value="">-- Set Kategori (Opsional) --</option>
+                    {catOptions.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                </select>
+            )}
+        </div>
+
+        <ul style={{ listStyle: 'none', padding: 0, margin: 0, maxHeight: '300px', overflowY: 'auto' }}>
+            {items.length === 0 && <li style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Belum ada entri data.</li>}
+            {items.map(i => (
+                <li key={i.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #f1f5f9' }}>
+                    <div>
+                        <div style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-main)' }}>{i.name}</div>
+                        {i.category_name && <div style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: 700, marginTop: '2px' }}>{i.category_name}</div>}
+                    </div>
+                    <button 
+                        onClick={() => onDelete(type, i.id)} 
+                        style={{ background: '#fee2e2', border: 'none', color: 'var(--danger)', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 800, transition: 'all 0.2s' }}
+                    >
+                        Hapus
+                    </button>
+                </li>
+            ))}
+        </ul>
+    </div>
+);
+
 const Settings = () => {
     const { user } = useContext(AuthContext);
 
@@ -90,59 +145,6 @@ const Settings = () => {
         }
     };
 
-    const SettingBox = ({ title, type, items, val, setVal, catVal, setCatVal, catOptions }) => (
-        <div style={{ flex: 1, background: 'white', padding: '24px', borderRadius: '16px', border: '1px solid #e2e8f0', minWidth: '300px', boxShadow: '0 4px 6px rgba(0,0,0,0.02)' }}>
-            <h3 style={{ marginBottom: '16px', fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.01em' }}>{title}</h3>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                    <input 
-                        type="text" 
-                        placeholder="Ketik Nama Baru..." 
-                        value={val} 
-                        onChange={e => setVal(e.target.value)} 
-                        style={{ flex: 1, padding: '10px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }} 
-                    />
-                    <button 
-                        onClick={() => handleAdd(type, val, setVal, catVal, setCatVal)} 
-                        className="btn btn-primary" 
-                        style={{ padding: '0 16px', fontSize: '1.2rem' }}
-                    >
-                        +
-                    </button>
-                </div>
-                {catOptions && (
-                    <select 
-                        value={catVal || ''} 
-                        onChange={e => setCatVal(e.target.value)} 
-                        style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '0.9rem' }}
-                    >
-                        <option value="">-- Set Kategori (Opsioal) --</option>
-                        {catOptions.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
-                    </select>
-                )}
-            </div>
-
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, maxHeight: '300px', overflowY: 'auto' }}>
-                {items.length === 0 && <li style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Belum ada entri data.</li>}
-                {items.map(i => (
-                    <li key={i.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #f1f5f9' }}>
-                        <div>
-                            <div style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-main)' }}>{i.name}</div>
-                            {i.category_name && <div style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: 700, marginTop: '2px' }}>{i.category_name}</div>}
-                        </div>
-                        <button 
-                            onClick={() => handleDelete(type, i.id)} 
-                            style={{ background: '#fee2e2', border: 'none', color: 'var(--danger)', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 800, transition: 'all 0.2s' }}
-                        >
-                            Hapus
-                        </button>
-                    </li>
-                ))}
-            </ul>
-        </div>
-    );
-
     return (
         <div>
             <div className="page-header" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end'}}>
@@ -153,11 +155,11 @@ const Settings = () => {
             </div>
 
             <div className="glass" style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', padding: '24px' }}>
-                <SettingBox title="🚢 Nama Kapal / Armada" type="ships" items={ships} val={newShip} setVal={setNewShip} catVal={newShipCategory} setCatVal={setNewShipCategory} catOptions={categories} />
-                <SettingBox title="🛥️ Model / Jenis Kapal" type="ship_types" items={shipTypes} val={newShipType} setVal={setNewShipType} />
-                <SettingBox title="💼 Tim Sales / Closing By" type="sales" items={sales} val={newSales} setVal={setNewSales} />
-                <SettingBox title="🏷️ Jenis Layanan Dasar" type="services" items={services} val={newService} setVal={setNewService} />
-                <SettingBox title="📂 Kategori Layanan / Sub-tipe" type="categories" items={categories} val={newCategory} setVal={setNewCategory} />
+                <SettingBox title="🚢 Nama Kapal / Armada" type="ships" items={ships} val={newShip} setVal={setNewShip} catVal={newShipCategory} setCatVal={setNewShipCategory} catOptions={categories} onAdd={handleAdd} onDelete={handleDelete} />
+                <SettingBox title="🛥️ Model / Jenis Kapal" type="ship_types" items={shipTypes} val={newShipType} setVal={setNewShipType} onAdd={handleAdd} onDelete={handleDelete} />
+                <SettingBox title="💼 Tim Sales / Closing By" type="sales" items={sales} val={newSales} setVal={setNewSales} onAdd={handleAdd} onDelete={handleDelete} />
+                <SettingBox title="🏷️ Jenis Layanan Dasar" type="services" items={services} val={newService} setVal={setNewService} onAdd={handleAdd} onDelete={handleDelete} />
+                <SettingBox title="📂 Kategori Layanan / Sub-tipe" type="categories" items={categories} val={newCategory} setVal={setNewCategory} onAdd={handleAdd} onDelete={handleDelete} />
             </div>
 
             {user?.role === 'admin' && (
