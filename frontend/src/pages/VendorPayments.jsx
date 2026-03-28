@@ -129,7 +129,7 @@ const VendorPayments = () => {
                                     <tr key={b.id}>
                                         <td style={{fontWeight: 600}}>{safeDate(b.trip_date)}</td>
                                         <td>
-                                            <div style={{fontWeight: 700}}>{b.guest_name || 'Tanpa Nama'}</div>
+                                            <div style={{fontWeight: 700}}>{String(b.guest_name || 'Tanpa Nama')}</div>
                                             <div style={{fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '2px'}}>{b.pax} Orang 👤</div>
                                         </td>
                                         <td>

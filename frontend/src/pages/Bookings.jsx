@@ -52,7 +52,10 @@ const Bookings = () => {
 
     const filtered = Array.isArray(bookings) ? bookings.filter(b => {
         const matchTab = activeTab === 'ALL' || b.status === activeTab;
-        const matchSearch = !search || b.guest_name?.toLowerCase().includes(search.toLowerCase()) || b.product_name?.toLowerCase().includes(search.toLowerCase());
+        const name = String(b.guest_name || '').toLowerCase();
+        const prod = String(b.product_name || '').toLowerCase();
+        const query = (search || '').toLowerCase();
+        const matchSearch = !search || name.includes(query) || prod.includes(query);
         return matchTab && matchSearch;
     }) : [];
 
@@ -126,13 +129,13 @@ const Bookings = () => {
                                             <div style={{ fontWeight: 700 }}>{b.guest_name || 'Tanpa Nama'} <span style={{ color: 'var(--primary)', fontSize: '0.78rem', fontWeight: 500 }}>({b.guest_type || 'WNI'})</span></div>
                                             <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 3 }}>
                                                 {b.guest_phone && (
-                                                    <a href={`https://wa.me/${b.guest_phone.replace(/\D/g, '').replace(/^0/, '62')}`} target="_blank" rel="noreferrer"
+                                                    <a href={`https://wa.me/${String(b.guest_phone).replace(/\D/g, '').replace(/^0/, '62')}`} target="_blank" rel="noreferrer"
                                                         style={{ background: '#1dc071', color: '#fff', padding: '2px 8px', borderRadius: 6, textDecoration: 'none', fontSize: '0.72rem', fontWeight: 700 }}>
                                                         WA 💬
                                                     </a>
                                                 )}
                                                 {b.documentation_url && (
-                                                    <a href={b.documentation_url} target="_blank" rel="noreferrer" title="Documentation Link"
+                                                    <a href={String(b.documentation_url)} target="_blank" rel="noreferrer" title="Documentation Link"
                                                         style={{ background: '#3b82f6', color: '#fff', padding: '2px 8px', borderRadius: 6, textDecoration: 'none', fontSize: '0.72rem', fontWeight: 700 }}>
                                                         DOC 🔗
                                                     </a>
