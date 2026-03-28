@@ -21,6 +21,7 @@ const api = {
 
   get: (url, params) => {
     let action = '';
+    let id = null;
     if (url.startsWith('/bookings')) action = 'getBookings';
     else if (url.startsWith('/guests')) {
       const parts = url.split('/');
@@ -31,6 +32,7 @@ const api = {
         action = 'getGuests';
       }
     }
+    // ... rest of cases ...
     else if (url.startsWith('/products')) action = 'getProducts';
     else if (url.startsWith('/refunds')) action = 'getRefunds';
     else if (url.startsWith('/users')) action = 'getUsers';
@@ -42,7 +44,7 @@ const api = {
     else if (url.startsWith('/settings/categories')) action = 'getCategories';
     else if (url.startsWith('/settings/ship_types')) action = 'getShipTypes';
     
-    return api._call(action, null, null, params);
+    return api._call(action, id, null, params);
   },
   
   post: (url, data) => {
