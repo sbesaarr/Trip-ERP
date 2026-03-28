@@ -48,6 +48,7 @@ const api = {
         payload = { ...data, booking_id: parts[2] };
       }
     } 
+    else if (url.startsWith('/guests')) action = 'addGuest';
     else if (url.startsWith('/bookings')) action = 'addBooking';
     else if (url.startsWith('/payments')) action = 'addPayment';
     else if (url.startsWith('/login')) action = 'login';
@@ -91,6 +92,7 @@ const api = {
     let id = parts[parts.length - 1];
     
     if (url.startsWith('/bookings')) action = 'deleteBooking';
+    else if (url.startsWith('/guests')) action = 'deleteGuest';
     else if (url.startsWith('/users')) action = 'deleteUser';
     else if (url.includes('/settings/ships')) action = 'deleteShip';
     else if (url.includes('/settings/sales')) action = 'deleteSales';
