@@ -27,8 +27,18 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (username, password) => {
         const res = await api.post('/login', { username, password });
+        
+        // Handle logical errors from GAS (which returns 200 OK even for login failures)
+        if (res.data.status === 'error') {
+            throw new Error(res.data.message || 'Username atau password salah');
+        }
+
         const { token, user } = res.data;
         
+        if (!token || !user) {
+            throw new Error('Data user tidak valid dari server');
+        }
+
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(user));
         
