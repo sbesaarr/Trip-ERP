@@ -22,7 +22,15 @@ const api = {
   get: (url, params) => {
     let action = '';
     if (url.startsWith('/bookings')) action = 'getBookings';
-    else if (url.startsWith('/guests')) action = 'getGuests';
+    else if (url.startsWith('/guests')) {
+      const parts = url.split('/');
+      if (parts.length > 2) {
+        action = 'getGuestDetail';
+        id = parts[2];
+      } else {
+        action = 'getGuests';
+      }
+    }
     else if (url.startsWith('/products')) action = 'getProducts';
     else if (url.startsWith('/refunds')) action = 'getRefunds';
     else if (url.startsWith('/users')) action = 'getUsers';
