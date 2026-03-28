@@ -27,6 +27,17 @@ const VendorPayments = () => {
 
     const formatCurrency = (val) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(val || 0);
 
+    const safeDate = (dateStr) => {
+        try {
+            if (!dateStr) return '-';
+            const d = new Date(dateStr);
+            if (isNaN(d.getTime())) return '-';
+            return format(d, 'dd MMM yyyy');
+        } catch {
+            return '-';
+        }
+    };
+
     const handleOpenModal = (b) => {
         setSelectedBooking(b);
         setOperatorPayments(b.operator_payments ? [...b.operator_payments] : []);
@@ -106,19 +117,19 @@ const VendorPayments = () => {
                         {loading ? (
                             <tr><td colSpan="8" style={{textAlign: 'center', padding: '40px'}}>Membaca data hutang vendor...</td></tr>
                         ) : (
-                            bookings.map(b => {
-                                const hppBase = b.cost_price * b.pax;
-                                const hppAddons = b.additional_services ? b.additional_services.reduce((acc, svc) => acc + ((svc.cost_price || 0) * svc.qty), 0) : 0;
+                            Array.isArray(bookings) && bookings.map(b => {
+                                const hppBase = (Number(b.cost_price) || 0) * (Number(b.pax) || 0);
+                                const hppAddons = Array.isArray(b.additional_services) ? b.additional_services.reduce((acc, svc) => acc + ((Number(svc.cost_price) || 0) * (Number(svc.qty) || 0)), 0) : 0;
                                 const hppTotal = hppBase + hppAddons;
                                 
-                                const totalPaidToOp = b.operator_payments ? b.operator_payments.reduce((sum, p) => sum + p.amount, 0) : 0;
+                                const totalPaidToOp = Array.isArray(b.operator_payments) ? b.operator_payments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0) : 0;
                                 const hutang = hppTotal - totalPaidToOp;
 
                                 return (
                                     <tr key={b.id}>
-                                        <td style={{fontWeight: 600}}>{format(new Date(b.trip_date), 'dd MMM yyyy')}</td>
+                                        <td style={{fontWeight: 600}}>{safeDate(b.trip_date)}</td>
                                         <td>
-                                            <div style={{fontWeight: 700}}>{b.guest_name}</div>
+                                            <div style={{fontWeight: 700}}>{b.guest_name || 'Tanpa Nama'}</div>
                                             <div style={{fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '2px'}}>{b.pax} Orang 👤</div>
                                         </td>
                                         <td>
@@ -133,7 +144,7 @@ const VendorPayments = () => {
                                             <strong style={{color: totalPaidToOp > 0 ? 'var(--secondary)' : 'var(--text-main)'}}>
                                                 {formatCurrency(totalPaidToOp)}
                                             </strong>
-                                            {b.operator_payments && b.operator_payments.some(p => p.proof_url) && (
+                                            {Array.isArray(b.operator_payments) && b.operator_payments.some(p => p.proof_url) && (
                                                 <div style={{fontSize: '0.7rem', color: '#16a34a', fontWeight: 700, marginTop: '4px'}}>BUKTI TF TERLAMPIR ✓</div>
                                             )}
                                         </td>
@@ -151,7 +162,7 @@ const VendorPayments = () => {
                                 );
                             })
                         )}
-                        {!loading && bookings.length === 0 && (
+                        {!loading && (!Array.isArray(bookings) || bookings.length === 0) && (
                             <tr><td colSpan="8" style={{textAlign: 'center', padding: '40px'}}>Belum ada data trip aktif.</td></tr>
                         )}
                     </tbody>

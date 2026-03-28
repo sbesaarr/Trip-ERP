@@ -34,16 +34,27 @@ const Bookings = () => {
 
     const formatCurrency = (val) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val || 0);
 
+    const safeDate = (dateStr) => {
+        try {
+            if (!dateStr) return '-';
+            const d = new Date(dateStr);
+            if (isNaN(d.getTime())) return '-';
+            return format(d, 'dd MMM yyyy');
+        } catch {
+            return '-';
+        }
+    };
+
     const counts = LEAD_STAGES.reduce((acc, s) => {
-        acc[s.key] = s.key === 'ALL' ? bookings.length : bookings.filter(b => b.status === s.key).length;
+        acc[s.key] = s.key === 'ALL' ? bookings.length : (Array.isArray(bookings) ? bookings.filter(b => b.status === s.key).length : 0);
         return acc;
     }, {});
 
-    const filtered = bookings.filter(b => {
+    const filtered = Array.isArray(bookings) ? bookings.filter(b => {
         const matchTab = activeTab === 'ALL' || b.status === activeTab;
         const matchSearch = !search || b.guest_name?.toLowerCase().includes(search.toLowerCase()) || b.product_name?.toLowerCase().includes(search.toLowerCase());
         return matchTab && matchSearch;
-    });
+    }) : [];
 
     const handleDelete = async (id) => {
         if (!window.confirm('Hapus keseluruhan transaksi ini?')) return;
@@ -103,16 +114,16 @@ const Bookings = () => {
                             <tr><td colSpan="8" style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>Tidak ada transaksi ditemukan.</td></tr>
                         ) : (
                             filtered.map(b => {
-                                const bPaid = (b.payments || []).reduce((s, p) => s + p.amount, 0);
-                                const isLunas = b.total_price - bPaid <= 0;
-                                const stage = getStage(b.lead_status);
+                                const bPaid = (Array.isArray(b.payments) ? b.payments : []).reduce((s, p) => s + (p.amount || 0), 0);
+                                const isLunas = (Number(b.total_price) || 0) - bPaid <= 0;
+                                const stage = getStage(b.status);
                                 return (
                                     <tr key={b.id} style={{ borderBottom: '1px solid #f3f4f6' }}
                                         onMouseOver={e => e.currentTarget.style.background = '#f9fafb'}
                                         onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
-                                        <td style={td}><strong>{b.trip_date ? format(new Date(b.trip_date), 'dd MMM yyyy') : '-'}</strong></td>
+                                        <td style={td}><strong>{safeDate(b.trip_date)}</strong></td>
                                         <td style={td}>
-                                            <div style={{ fontWeight: 700 }}>{b.guest_name} <span style={{ color: 'var(--primary)', fontSize: '0.78rem', fontWeight: 500 }}>({b.guest_type || 'WNI'})</span></div>
+                                            <div style={{ fontWeight: 700 }}>{b.guest_name || 'Tanpa Nama'} <span style={{ color: 'var(--primary)', fontSize: '0.78rem', fontWeight: 500 }}>({b.guest_type || 'WNI'})</span></div>
                                             <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 3 }}>
                                                 {b.guest_phone && (
                                                     <a href={`https://wa.me/${b.guest_phone.replace(/\D/g, '').replace(/^0/, '62')}`} target="_blank" rel="noreferrer"
