@@ -215,10 +215,11 @@ const VendorPayments = () => {
                                             <div style={{flex: 1, textAlign: 'right', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'flex-end'}}>
                                                 {isUploading && <span style={{fontSize: '12px', color: 'var(--text-muted)'}}>Mengunggah gambar...</span>}
                                                 {pay.proof_url && (
-                                                    <a href={pay.proof_url.startsWith('http') ? pay.proof_url : `http://localhost:3000${pay.proof_url}`} target="_blank" rel="noreferrer" 
+                                                    <a href={pay.proof_url} target="_blank" rel="noreferrer" 
                                                        style={{fontSize: '12px', color: 'var(--secondary)', background: '#dcfce7', padding: '6px 14px', borderRadius: '20px', textDecoration: 'none', fontWeight: 700}}>
                                                         Lihat Struk ↗
                                                     </a>
+                                                )}
                                                 )}
                                             </div>
                                         </div>

@@ -1,0 +1,531 @@
+{
+  "Bookings": [
+    {
+      "id": 1,
+      "product_id": 1,
+      "guest_id": 2,
+      "trip_date": "2026-04-03",
+      "pax": 3,
+      "total_price": 7800000,
+      "down_payment": 0,
+      "status": "Cancel",
+      "created_at": "2026-03-24 07:36:20",
+      "closing_by": "Sinar",
+      "guest_type": "WNI",
+      "service_type": "Open Trip",
+      "ship_name": "",
+      "operator_name": "",
+      "service_category": "",
+      "ship_type": "",
+      "cabin_name": "",
+      "lead_status": "REFUND",
+      "documentation_url": null
+    },
+    {
+      "id": 2,
+      "product_id": 3,
+      "guest_id": 3,
+      "trip_date": "2026-04-04",
+      "pax": 1,
+      "total_price": 8500000,
+      "down_payment": 0,
+      "status": "Sudah Trip",
+      "created_at": "2026-03-25 02:47:04",
+      "closing_by": "Fitri",
+      "guest_type": "WNI",
+      "service_type": "Open Trip",
+      "ship_name": "Semesta Voyages",
+      "operator_name": "",
+      "service_category": "SAILING TRIP PHINISI",
+      "ship_type": "Luxury Phinisi",
+      "cabin_name": "",
+      "lead_status": "LEADS",
+      "documentation_url": null
+    },
+    {
+      "id": 3,
+      "product_id": 2,
+      "guest_id": 2,
+      "trip_date": "2026-03-25",
+      "pax": 1,
+      "total_price": 3750000,
+      "down_payment": 0,
+      "status": "Booking",
+      "created_at": "2026-03-25 04:38:36",
+      "closing_by": "Sinar",
+      "guest_type": "WNI",
+      "service_type": "Open Trip",
+      "ship_name": "Dinara 1",
+      "operator_name": "",
+      "service_category": "SAILING TRIP PHINISI",
+      "ship_type": "Luxury Phinisi",
+      "cabin_name": "",
+      "lead_status": "Booking",
+      "documentation_url": null
+    },
+    {
+      "id": 4,
+      "product_id": 1,
+      "guest_id": 4,
+      "trip_date": "2026-03-26",
+      "pax": 1,
+      "total_price": 1850000,
+      "down_payment": 0,
+      "status": "Booking",
+      "created_at": "2026-03-26 06:37:22",
+      "closing_by": "Fitri",
+      "guest_type": "WNI",
+      "service_type": "Open Trip",
+      "ship_name": "",
+      "operator_name": "",
+      "service_category": "PRIVATE DARAT",
+      "ship_type": "Luxury Phinisi",
+      "cabin_name": "",
+      "lead_status": "LEADS",
+      "documentation_url": null
+    },
+    {
+      "id": 5,
+      "product_id": 1,
+      "guest_id": 6,
+      "trip_date": "2026-03-26",
+      "pax": 1,
+      "total_price": 1850000,
+      "down_payment": 0,
+      "status": "Cancel",
+      "created_at": "2026-03-26 08:17:39",
+      "closing_by": "Fitri",
+      "guest_type": "WNI",
+      "service_type": "Open Trip",
+      "ship_name": "Semesta Voyages",
+      "operator_name": "",
+      "service_category": "SAILING TRIP PHINISI",
+      "ship_type": "Deluxe Phinisi",
+      "cabin_name": "",
+      "lead_status": "REFUND",
+      "documentation_url": null
+    },
+    {
+      "id": 6,
+      "product_id": 2,
+      "guest_id": 5,
+      "trip_date": "2026-03-26",
+      "pax": 3,
+      "total_price": 6000000,
+      "down_payment": 0,
+      "status": "Booking",
+      "created_at": "2026-03-26 08:21:02",
+      "closing_by": "Fitri",
+      "guest_type": "WNI",
+      "service_type": "Open Trip",
+      "ship_name": "Dinara 1",
+      "operator_name": "",
+      "service_category": "SAILING TRIP PHINISI",
+      "ship_type": "Deluxe Phinisi",
+      "cabin_name": "",
+      "lead_status": "Booking",
+      "documentation_url": null
+    }
+  ],
+  "Guests": [
+    {
+      "id": 1,
+      "name": "febri",
+      "phone": "083100871291"
+    },
+    {
+      "id": 2,
+      "name": "Febri",
+      "phone": "083100871291"
+    },
+    {
+      "id": 3,
+      "name": "tes",
+      "phone": "0877567887"
+    },
+    {
+      "id": 4,
+      "name": "Riyan",
+      "phone": "082117788336"
+    },
+    {
+      "id": 5,
+      "name": "riski",
+      "phone": "0864546577"
+    },
+    {
+      "id": 6,
+      "name": "Andi",
+      "phone": "08212343534554"
+    }
+  ],
+  "Products": [
+    {
+      "id": 1,
+      "name": "Open Trip Waerebo 2D1N",
+      "type": "Open Trip",
+      "price": 1850000,
+      "cost_price": 1500000
+    },
+    {
+      "id": 2,
+      "name": "Open Trip Nuca Molas 2D1N",
+      "type": "Open Trip",
+      "price": 2000000,
+      "cost_price": 1700000
+    },
+    {
+      "id": 3,
+      "name": "Overland Flores 5D4N",
+      "type": "Open Trip",
+      "price": 8500000,
+      "cost_price": 7500000
+    },
+    {
+      "id": 4,
+      "name": "Open Trip Kelimutu Fullday",
+      "type": "Open Trip",
+      "price": 1250000,
+      "cost_price": 945000
+    },
+    {
+      "id": 5,
+      "name": "Sailing Phinisi Superior - ZAHRA JAYA 02",
+      "type": "Sailing Trip",
+      "price": 5000000,
+      "cost_price": 4500000
+    },
+    {
+      "id": 6,
+      "name": "Sailing Phinisi Deluxe - SENADA",
+      "type": "Sailing Trip",
+      "price": 7000000,
+      "cost_price": 6000000
+    },
+    {
+      "id": 7,
+      "name": "Sailing 1 Day Speedboat - EXPLORE TOGETHER",
+      "type": "Sailing Trip",
+      "price": 1350000,
+      "cost_price": 900000
+    },
+    {
+      "id": 8,
+      "name": "Private Trip Waerebo 2D1N (Base Price)",
+      "type": "Private Trip",
+      "price": 5600000,
+      "cost_price": 4500000
+    },
+    {
+      "id": 9,
+      "name": "Private Trip Nuca Molas 2D1N (Base Price)",
+      "type": "Private Trip",
+      "price": 6000000,
+      "cost_price": 5000000
+    },
+    {
+      "id": 10,
+      "name": "Private Trip City Tour 1 Day",
+      "type": "Private Trip",
+      "price": 1500000,
+      "cost_price": 1200000
+    },
+    {
+      "id": 11,
+      "name": "Sewa Dokumentasi Drone",
+      "type": "Layanan Tambahan",
+      "price": 1500000,
+      "cost_price": 1000000
+    },
+    {
+      "id": 12,
+      "name": "Airport Transfer",
+      "type": "Layanan Tambahan",
+      "price": 250000,
+      "cost_price": 150000
+    },
+    {
+      "id": 13,
+      "name": "Hotel & Akomodasi",
+      "type": "Layanan Tambahan",
+      "price": 750000,
+      "cost_price": 600000
+    },
+    {
+      "id": 14,
+      "name": "Extra Meals / BBQ",
+      "type": "Layanan Tambahan",
+      "price": 350000,
+      "cost_price": 250000
+    },
+    {
+      "id": 15,
+      "name": "test",
+      "type": "Open Trip",
+      "price": 500000,
+      "cost_price": 100000
+    }
+  ],
+  "Payments": [
+    {
+      "id": 12,
+      "booking_id": 3,
+      "payment_date": "2026-03-25",
+      "amount": 500000,
+      "proof_url": null
+    },
+    {
+      "id": 13,
+      "booking_id": 1,
+      "payment_date": "2026-04-03",
+      "amount": 500000,
+      "proof_url": "/uploads/1774338697837.jpg"
+    },
+    {
+      "id": 14,
+      "booking_id": 1,
+      "payment_date": "2026-03-24",
+      "amount": 7300000,
+      "proof_url": "/uploads/1774338703030.jpg"
+    },
+    {
+      "id": 23,
+      "booking_id": 2,
+      "payment_date": "2026-03-25",
+      "amount": 500000,
+      "proof_url": "/uploads/1774406813316.png"
+    },
+    {
+      "id": 26,
+      "booking_id": 5,
+      "payment_date": "2026-03-26",
+      "amount": 500000,
+      "proof_url": null
+    }
+  ],
+  "Refunds": [
+    {
+      "id": 1,
+      "booking_id": 5,
+      "refund_date": "2026-03-28",
+      "amount": 1000,
+      "note": "Verified refund"
+    },
+    {
+      "id": 2,
+      "booking_id": 5,
+      "refund_date": "2026-03-28",
+      "amount": 499000,
+      "note": "Full refund"
+    },
+    {
+      "id": 3,
+      "booking_id": 1,
+      "refund_date": "2026-03-28",
+      "amount": 7800000,
+      "note": ""
+    }
+  ],
+  "ExtraServices": [
+    {
+      "id": 15,
+      "booking_id": 3,
+      "product_id": 12,
+      "qty": 1,
+      "price": 250000
+    },
+    {
+      "id": 16,
+      "booking_id": 3,
+      "product_id": 11,
+      "qty": 1,
+      "price": 1500000
+    },
+    {
+      "id": 17,
+      "booking_id": 1,
+      "product_id": 13,
+      "qty": 1,
+      "price": 750000
+    },
+    {
+      "id": 18,
+      "booking_id": 1,
+      "product_id": 11,
+      "qty": 1,
+      "price": 1500000
+    }
+  ],
+  "OperatorPayments": [],
+  "Users": [
+    {
+      "id": 2,
+      "username": "Febri",
+      "password": "$2b$08$2t1dNbbrBysIRG15CpPjvu5C4mwmie8CRWdqapIX7VA0P1lp5oXSW",
+      "role": "staff",
+      "photo_url": null
+    },
+    {
+      "id": 3,
+      "username": "admin",
+      "password": "$2b$08$uceJWjMhleemp5Sta4.EDOkBHmO2lOKYrV9hYzUN37kaAydKFdInG",
+      "role": "admin",
+      "photo_url": null
+    }
+  ],
+  "Ships": [
+    {
+      "id": 12,
+      "name": "Explore Together",
+      "category_name": "SAILING TRIP 1 DAY"
+    },
+    {
+      "id": 13,
+      "name": "Wave Rider",
+      "category_name": "SAILING TRIP 1 DAY"
+    },
+    {
+      "id": 14,
+      "name": "Sea Zaydan",
+      "category_name": "SAILING TRIP 1 DAY"
+    },
+    {
+      "id": 15,
+      "name": "Makara",
+      "category_name": "SAILING TRIP 1 DAY"
+    },
+    {
+      "id": 16,
+      "name": "Lamain Cruise",
+      "category_name": "SAILING TRIP 1 DAY"
+    },
+    {
+      "id": 17,
+      "name": "Kimochi Voyages",
+      "category_name": "SAILING TRIP 1 DAY"
+    },
+    {
+      "id": 18,
+      "name": "Elissa Speedboat",
+      "category_name": "SAILING TRIP 1 DAY"
+    },
+    {
+      "id": 19,
+      "name": "East Cruise",
+      "category_name": "SAILING TRIP 1 DAY"
+    },
+    {
+      "id": 20,
+      "name": "Lacoco",
+      "category_name": "SAILING TRIP 1 DAY"
+    },
+    {
+      "id": 21,
+      "name": "Elrora",
+      "category_name": "SAILING TRIP 1 DAY"
+    },
+    {
+      "id": 22,
+      "name": "Redwhale",
+      "category_name": "SAILING TRIP 1 DAY"
+    },
+    {
+      "id": 23,
+      "name": "Senada",
+      "category_name": "SAILING TRIP PHINISI"
+    },
+    {
+      "id": 24,
+      "name": "Umami",
+      "category_name": "SAILING TRIP PHINISI"
+    },
+    {
+      "id": 25,
+      "name": "Lamborajo 1",
+      "category_name": "SAILING TRIP PHINISI"
+    },
+    {
+      "id": 26,
+      "name": "Pesona Bajo",
+      "category_name": "SAILING TRIP PHINISI"
+    },
+    {
+      "id": 27,
+      "name": "Soe Besar Vanrei",
+      "category_name": "SAILING TRIP PHINISI"
+    },
+    {
+      "id": 28,
+      "name": "Semesta Voyages",
+      "category_name": "SAILING TRIP PHINISI"
+    },
+    {
+      "id": 29,
+      "name": "Dinara 1",
+      "category_name": "SAILING TRIP PHINISI"
+    },
+    {
+      "id": 30,
+      "name": "NK Jaya 2",
+      "category_name": "SAILING TRIP PHINISI"
+    }
+  ],
+  "Sales": [
+    {
+      "id": 4,
+      "name": "Syifa"
+    },
+    {
+      "id": 5,
+      "name": "Juan"
+    },
+    {
+      "id": 6,
+      "name": "Sinar"
+    },
+    {
+      "id": 7,
+      "name": "Fitri"
+    }
+  ],
+  "Categories": [
+    {
+      "id": 1,
+      "name": "SAILING TRIP 1 DAY"
+    },
+    {
+      "id": 2,
+      "name": "SAILING TRIP PHINISI"
+    },
+    {
+      "id": 4,
+      "name": "TRIP KHUSUS"
+    },
+    {
+      "id": 5,
+      "name": "TRIP UMUM"
+    },
+    {
+      "id": 6,
+      "name": "PRIVATE DARAT"
+    }
+  ],
+  "ShipTypes": [
+    {
+      "id": 1,
+      "name": "Standart Boat"
+    },
+    {
+      "id": 2,
+      "name": "Superior Phinisi"
+    },
+    {
+      "id": 3,
+      "name": "Deluxe Phinisi"
+    },
+    {
+      "id": 4,
+      "name": "Luxury Phinisi"
+    }
+  ]
+}

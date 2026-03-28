@@ -31,6 +31,10 @@ app.post('/api/upload', upload.single('proof'), (req, res) => {
     res.json({ url: `/uploads/${req.file.filename}` });
 });
 
+app.get('/api/ping', (req, res) => {
+    res.json({ status: 'ok', timestamp: new Date(), version: 'v2-with-guests' });
+});
+
 // --- AUTH ROUTES ---
 const JWT_SECRET = 'menuju_trip_super_secret_key_123';
 
@@ -197,7 +201,7 @@ app.get('/api/bookings', (req, res) => {
         FROM bookings b
         JOIN products p ON b.product_id = p.id
         JOIN guests g ON b.guest_id = g.id
-        ORDER BY b.trip_date ASC
+        ORDER BY b.trip_date DESC
     `;
     db.all(query, [], (err, bookings) => {
         if (err) return res.status(500).json({ error: err.message });
@@ -206,13 +210,16 @@ app.get('/api/bookings', (req, res) => {
             db.all("SELECT * FROM booking_payments", [], (err3, payments) => {
                 if (err3) return res.status(500).json({ error: err3.message });
                 db.all("SELECT * FROM operator_payments", [], (err4, op_payments) => {
-                    const results = bookings.map(b => ({
-                        ...b,
-                        additional_services: services.filter(s => s.booking_id === b.id),
-                        payments: payments.filter(p => p.booking_id === b.id),
-                        operator_payments: op_payments ? op_payments.filter(p => p.booking_id === b.id) : []
-                    }));
-                    res.json(results);
+                    db.all("SELECT * FROM refunds", [], (err5, refunds) => {
+                        const results = bookings.map(b => ({
+                            ...b,
+                            additional_services: services.filter(s => s.booking_id === b.id),
+                            payments: payments.filter(p => p.booking_id === b.id),
+                            operator_payments: op_payments ? op_payments.filter(p => p.booking_id === b.id) : [],
+                            refunds: refunds ? refunds.filter(r => r.booking_id === b.id) : []
+                        }));
+                        res.json(results);
+                    });
                 });
             });
         });
@@ -220,19 +227,16 @@ app.get('/api/bookings', (req, res) => {
 });
 
 app.post('/api/bookings', (req, res) => {
-    const { guest_name, guest_phone, product_id, trip_date, pax, total_price, down_payment, additional_services, payments, closing_by, guest_type, service_type, service_category, ship_type, cabin_name, ship_name, operator_name, operator_payments } = req.body;
-    
-    db.run("INSERT INTO guests (name, phone) VALUES (?, ?)", [guest_name, guest_phone], function (err) {
-        if (err) return res.status(500).json({ error: err.message });
-        const guest_id = this.lastID;
-        
+    const { guest_id, guest_name, guest_phone, product_id, trip_date, pax, total_price, down_payment, additional_services, payments, closing_by, guest_type, service_type, service_category, ship_type, cabin_name, ship_name, operator_name, operator_payments, status, documentation_url } = req.body;
+
+    const createBooking = (gid) => {
         db.run(
-            "INSERT INTO bookings (product_id, guest_id, trip_date, pax, total_price, down_payment, closing_by, guest_type, service_type, service_category, ship_type, cabin_name, ship_name, operator_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            [product_id, guest_id, trip_date, pax, total_price, down_payment, closing_by, guest_type, service_type, service_category, ship_type, cabin_name, ship_name, operator_name],
+            "INSERT INTO bookings (product_id, guest_id, trip_date, pax, total_price, down_payment, closing_by, guest_type, service_type, service_category, ship_type, cabin_name, ship_name, operator_name, status, documentation_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [product_id, gid, trip_date, pax, total_price, down_payment, closing_by, guest_type, service_type, service_category, ship_type, cabin_name, ship_name, operator_name, status || 'Booking', documentation_url || null],
             function (err2) {
                 if (err2) return res.status(500).json({ error: err2.message });
                 const booking_id = this.lastID;
-                
+
                 const processOpPayments = () => {
                     if (operator_payments && operator_payments.length > 0) {
                         const stmt = db.prepare("INSERT INTO operator_payments (booking_id, payment_date, amount, proof_url) VALUES (?, ?, ?, ?)");
@@ -255,81 +259,122 @@ app.post('/api/bookings', (req, res) => {
 
                 if (additional_services && additional_services.length > 0) {
                     const stmt = db.prepare("INSERT INTO booking_services (booking_id, product_id, qty, price) VALUES (?, ?, ?, ?)");
-                    additional_services.forEach(svc => {
-                        stmt.run(booking_id, svc.product_id, svc.qty, svc.price);
-                    });
+                    additional_services.forEach(svc => stmt.run(booking_id, svc.product_id, svc.qty, svc.price));
                     stmt.finalize(processPayments);
                 } else {
                     processPayments();
                 }
             }
         );
-    });
+    };
+
+    // Reuse existing guest or create new one
+    if (guest_id) {
+        createBooking(guest_id);
+    } else {
+        db.run("INSERT INTO guests (name, phone) VALUES (?, ?)", [guest_name, guest_phone], function(err) {
+            if (err) return res.status(500).json({ error: err.message });
+            createBooking(this.lastID);
+        });
+    }
 });
 
 app.put('/api/bookings/:id', (req, res) => {
-    const { guest_name, guest_phone, product_id, trip_date, pax, total_price, down_payment, additional_services, payments, closing_by, guest_type, service_type, service_category, ship_type, cabin_name, ship_name, operator_name, operator_payments, guest_id } = req.body;
+    const { 
+        guest_name, guest_phone, product_id, trip_date, pax, total_price, 
+        additional_services, payments, closing_by, guest_type, 
+        service_type, service_category, ship_type, cabin_name, 
+        ship_name, operator_name, operator_payments, guest_id, status, documentation_url
+    } = req.body;
     const booking_id = req.params.id;
 
-    db.run("UPDATE guests SET name = ?, phone = ? WHERE id = ?", [guest_name, guest_phone, guest_id], (err) => {
-        if (err) return res.status(500).json({ error: err.message });
-        
-        db.run(
-            "UPDATE bookings SET product_id = ?, trip_date = ?, pax = ?, total_price = ?, down_payment = ?, closing_by = ?, guest_type = ?, service_type = ?, service_category = ?, ship_type = ?, cabin_name = ?, ship_name = ?, operator_name = ? WHERE id = ?",
-            [product_id, trip_date, pax, total_price, down_payment, closing_by, guest_type, service_type, service_category, ship_type, cabin_name, ship_name, operator_name, booking_id],
-            (err2) => {
-                if (err2) return res.status(500).json({ error: err2.message });
-                
-                db.run("DELETE FROM booking_services WHERE booking_id = ?", [booking_id], (err3) => {
-                    const processOpPayments = () => {
-                        db.run("DELETE FROM operator_payments WHERE booking_id = ?", [booking_id], () => {
-                            if (operator_payments && operator_payments.length > 0) {
-                                const stmt = db.prepare("INSERT INTO operator_payments (booking_id, payment_date, amount, proof_url) VALUES (?, ?, ?, ?)");
-                                operator_payments.forEach(p => stmt.run(booking_id, p.payment_date, p.amount, p.proof_url || null));
-                                stmt.finalize(() => res.json({ updated: true }));
-                            } else {
-                                res.json({ updated: true });
-                            }
-                        });
-                    };
+    // 1. Update Guest if name provided
+    if (guest_id && (guest_name || guest_phone)) {
+        db.run("UPDATE guests SET name = COALESCE(?, name), phone = COALESCE(?, phone) WHERE id = ?", [guest_name || null, guest_phone || null, guest_id]);
+    }
 
-                    const processPayments = () => {
-                        db.run("DELETE FROM booking_payments WHERE booking_id = ?", [booking_id], () => {
-                            if (payments && payments.length > 0) {
-                                const stmt = db.prepare("INSERT INTO booking_payments (booking_id, payment_date, amount, proof_url) VALUES (?, ?, ?, ?)");
-                                payments.forEach(p => stmt.run(booking_id, p.payment_date, p.amount, p.proof_url || null));
-                                stmt.finalize(processOpPayments);
-                            } else {
-                                processOpPayments();
-                            }
-                        });
-                    };
+    // 2. Update Booking
+    const q = `
+        UPDATE bookings SET 
+            product_id = ?, trip_date = ?, pax = ?, total_price = ?, 
+            closing_by = ?, guest_type = ?, service_type = ?, 
+            service_category = ?, ship_type = ?, cabin_name = ?, 
+            ship_name = ?, operator_name = ?, status = ?, documentation_url = ?
+        WHERE id = ?
+    `;
+    const params = [
+        product_id, trip_date, pax, total_price, 
+        closing_by, guest_type, service_type, 
+        service_category, ship_type, cabin_name, 
+        ship_name, operator_name, status || 'Booking',
+        documentation_url || null,
+        booking_id
+    ];
 
-                    if (additional_services && additional_services.length > 0) {
-                        const stmt = db.prepare("INSERT INTO booking_services (booking_id, product_id, qty, price) VALUES (?, ?, ?, ?)");
-                        additional_services.forEach(svc => {
-                            stmt.run(booking_id, svc.product_id, svc.qty, svc.price);
-                        });
-                        stmt.finalize(processPayments);
-                    } else {
-                        processPayments();
-                    }
-                });
+    db.run(q, params, function(err) {
+        if (err) {
+            console.error('Error updating booking:', err);
+            return res.status(500).json({ error: err.message });
+        }
+
+        // 3. Update Services
+        db.run("DELETE FROM booking_services WHERE booking_id = ?", [booking_id], (err2) => {
+            if (err2) console.error('Error deleting services:', err2);
+            
+            if (additional_services && additional_services.length > 0) {
+                const stmt = db.prepare("INSERT INTO booking_services (booking_id, product_id, qty, price) VALUES (?, ?, ?, ?)");
+                additional_services.forEach(svc => stmt.run(booking_id, svc.product_id, svc.qty, svc.price));
+                stmt.finalize();
             }
-        );
+
+            // 4. Update Payments
+            db.run("DELETE FROM booking_payments WHERE booking_id = ?", [booking_id], (err3) => {
+                if (err3) console.error('Error deleting payments:', err3);
+                
+                if (payments && payments.length > 0) {
+                    const stmt = db.prepare("INSERT INTO booking_payments (booking_id, payment_date, amount, proof_url) VALUES (?, ?, ?, ?)");
+                    payments.forEach(p => stmt.run(booking_id, p.payment_date, p.amount, p.proof_url || null));
+                    stmt.finalize();
+                }
+
+                // 5. Update Operator Payments
+                db.run("DELETE FROM operator_payments WHERE booking_id = ?", [booking_id], (err4) => {
+                    if (err4) console.error('Error deleting op payments:', err4);
+                    
+                    if (operator_payments && operator_payments.length > 0) {
+                        const stmt = db.prepare("INSERT INTO operator_payments (booking_id, payment_date, amount, proof_url) VALUES (?, ?, ?, ?)");
+                        operator_payments.forEach(p => stmt.run(booking_id, p.payment_date, p.amount, p.proof_url || null));
+                        stmt.finalize();
+                    }
+                    
+                    res.json({ updated: true });
+                });
+            });
+        });
     });
 });
 
 app.delete('/api/bookings/:id', (req, res) => {
-    db.run("DELETE FROM operator_payments WHERE booking_id = ?", [req.params.id], () => {
-        db.run("DELETE FROM booking_payments WHERE booking_id = ?", [req.params.id], () => {
-            db.run("DELETE FROM booking_services WHERE booking_id = ?", [req.params.id], () => {
-                db.run("DELETE FROM bookings WHERE id = ?", [req.params.id], function (err2) {
-                    if (err2) return res.status(500).json({ error: err2.message });
-                    res.json({ deleted: this.changes });
+    db.run("DELETE FROM refunds WHERE booking_id = ?", [req.params.id], () => {
+        db.run("DELETE FROM operator_payments WHERE booking_id = ?", [req.params.id], () => {
+            db.run("DELETE FROM booking_payments WHERE booking_id = ?", [req.params.id], () => {
+                db.run("DELETE FROM booking_services WHERE booking_id = ?", [req.params.id], () => {
+                    db.run("DELETE FROM bookings WHERE id = ?", [req.params.id], function (err2) {
+                        if (err2) return res.status(500).json({ error: err2.message });
+                        res.json({ deleted: this.changes });
+                    });
                 });
             });
         });
+    });
+
+});
+
+app.patch('/api/bookings/:id/status', (req, res) => {
+    const { status } = req.body;
+    db.run("UPDATE bookings SET status = ? WHERE id = ?", [status, req.params.id], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ updated: this.changes });
     });
 });
 
@@ -338,6 +383,27 @@ app.patch('/api/bookings/:id/status', (req, res) => {
     db.run("UPDATE bookings SET status = ? WHERE id = ?", [status, req.params.id], function (err) {
         if (err) return res.status(500).json({ error: err.message });
         res.json({ updated: this.changes });
+    });
+});
+
+app.post('/api/bookings/:id/refund', (req, res) => {
+    const { refund_date, amount, note } = req.body;
+    if (!amount || amount <= 0) return res.status(400).json({ error: 'Nominal refund tidak valid' });
+    db.run(
+        'INSERT INTO refunds (booking_id, refund_date, amount, note) VALUES (?, ?, ?, ?)',
+        [req.params.id, refund_date, amount, note || ''],
+        function(err) {
+            if (err) return res.status(500).json({ error: err.message });
+            // Status remains Cancel, we just record the refund
+            res.json({ id: this.lastID });
+        }
+    );
+});
+
+app.get('/api/bookings/:id/refunds', (req, res) => {
+    db.all('SELECT * FROM refunds WHERE booking_id = ? ORDER BY refund_date DESC', [req.params.id], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(rows);
     });
 });
 
@@ -443,6 +509,72 @@ app.get('/api/dashboard/full', (req, res) => {
                         top_ship: getTop(shipFreq, 1)[0] || {name: '-', value: 0}
                     },
                     sales: getTop(salesClosing, 10)
+                });
+            });
+        });
+    });
+});
+
+// --- GUESTS / DATA TAMU ROUTES ---
+app.get('/api/guests', (req, res) => {
+    const query = `
+        SELECT 
+            g.id, g.name, g.phone,
+            COUNT(b.id) as total_bookings,
+            MAX(b.trip_date) as last_trip_date,
+            SUM(b.total_price) as total_spent
+        FROM guests g
+        LEFT JOIN bookings b ON b.guest_id = g.id
+        GROUP BY g.id, g.name, g.phone
+        ORDER BY last_trip_date DESC, g.id DESC
+    `;
+    db.all(query, [], (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(rows);
+    });
+});
+
+app.post('/api/guests', (req, res) => {
+    const { name, phone } = req.body;
+    if (!name || !name.trim()) return res.status(400).json({ error: 'Nama tamu wajib diisi' });
+    db.run('INSERT INTO guests (name, phone) VALUES (?, ?)', [name.trim(), phone || ''], function(err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ id: this.lastID, name: name.trim(), phone: phone || '' });
+    });
+});
+
+app.put('/api/guests/:id', (req, res) => {
+    const { name, phone } = req.body;
+    if (!name || !name.trim()) return res.status(400).json({ error: 'Nama tamu wajib diisi' });
+    db.run('UPDATE guests SET name = ?, phone = ? WHERE id = ?', [name.trim(), phone || '', req.params.id], function(err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ updated: this.changes });
+    });
+});
+
+app.get('/api/guests/:id', (req, res) => {
+    db.get('SELECT * FROM guests WHERE id = ?', [req.params.id], (err, guest) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (!guest) return res.status(404).json({ error: 'Tamu tidak ditemukan' });
+
+        const bookingQuery = `
+            SELECT b.*, p.name as product_name, p.cost_price
+            FROM bookings b
+            JOIN products p ON b.product_id = p.id
+            WHERE b.guest_id = ?
+            ORDER BY b.trip_date DESC
+        `;
+        db.all(bookingQuery, [req.params.id], (err2, bookings) => {
+            if (err2) return res.status(500).json({ error: err2.message });
+            db.all('SELECT * FROM booking_payments WHERE booking_id IN (SELECT id FROM bookings WHERE guest_id = ?)', [req.params.id], (err3, payments) => {
+                if (err3) return res.status(500).json({ error: err3.message });
+                db.all('SELECT * FROM refunds WHERE booking_id IN (SELECT id FROM bookings WHERE guest_id = ?)', [req.params.id], (err4, refunds) => {
+                    const enriched = bookings.map(b => ({
+                        ...b,
+                        payments: payments.filter(p => p.booking_id === b.id),
+                        refunds: refunds ? refunds.filter(r => r.booking_id === b.id) : []
+                    }));
+                    res.json({ guest, bookings: enriched });
                 });
             });
         });

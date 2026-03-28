@@ -104,7 +104,7 @@ const Profile = () => {
                     <div style={{ position: 'relative', width: '150px', height: '150px', margin: '0 auto 20px auto' }}>
                         {profile.photo_url ? (
                             <img 
-                                src={profile.photo_url.startsWith('http') ? profile.photo_url : `http://localhost:3000${profile.photo_url}`} 
+                                src={profile.photo_url} 
                                 alt="Avatar" 
                                 style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', border: '4px solid white', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }} 
                             />

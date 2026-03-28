@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Link, useLocation } from 'react-router-dom';
+import { Route, Routes, Link, useLocation } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import Products from './pages/Products';
 import Bookings from './pages/Bookings';
@@ -98,9 +98,7 @@ const AppContent = () => {
 function App() {
     return (
         <AuthProvider>
-            <Router>
-                <AppContent />
-            </Router>
+            <AppContent />
         </AuthProvider>
     );
 }
